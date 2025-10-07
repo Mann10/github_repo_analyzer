@@ -9,8 +9,9 @@ load_dotenv()
 class GitHubClient:
     def __init__(self, token: Optional[str] = None):
         """Initialize GitHub client with optional token for higher rate limits."""
-        self.token = token or os.getenv("GITHUB_TOKEN")
-        self.client = Github(self.token) if self.token else Github()
+        # Initialize without token for anonymous access
+        self.client = Github()
+        self.rate_limit_warning_shown = False
     
     def get_repo(self, repo_url: str) -> Repository:
         """Extract owner/repo from URL and get repository object."""
@@ -34,6 +35,16 @@ class GitHubClient:
             raise ValueError("Could not extract owner and repository name from URL")
             
         try:
+            # Check rate limit before making request
+            rate_limit = self.client.get_rate_limit()
+            if rate_limit.core.remaining < 10 and not self.rate_limit_warning_shown:
+                self.rate_limit_warning_shown = True
+                reset_time = rate_limit.core.reset.strftime("%H:%M:%S")
+                raise ValueError(
+                    f"GitHub API rate limit is low. Requests will reset at {reset_time}. "
+                    "Using this tool without authentication limits you to 60 requests per hour."
+                )
+                
             repo = self.client.get_repo(f"{owner}/{repo_name}")
             # Try to access a property to verify we have access
             _ = repo.name

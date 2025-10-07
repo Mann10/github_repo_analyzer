@@ -31,11 +31,14 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-4. Set up GitHub token (optional but recommended):
-Create a `.env` file in the root directory and add your GitHub token:
-```
-GITHUB_TOKEN=your_github_token_here
-```
+4. Usage Notes:
+- No GitHub token is required! The analyzer works with anonymous access
+- Rate limits: 60 requests per hour without authentication
+- For more requests (5000/hour), you can optionally add a GitHub token:
+  ```
+  # Create .env file (optional)
+  GITHUB_TOKEN=your_github_token_here
+  ```
 
 ## Usage
 
